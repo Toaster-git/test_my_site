@@ -48,8 +48,8 @@ This website was developed for my friend's personal project — the private serv
 ### Как указать авторство <br/>  How to Attribute
 При использовании этого кода, пожалуйста, укажите авторство следующим образом. <br/> If you use this code, please provide attribution as follows:
 
-> Проект "[DARK GDPS Website](https://toaster-git.github.io/test_my_site/)" от toaster-git доступен по лицензии [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Исходный код: [ссылка на репозиторий]. <br>
-> The project "[DARK GDPS Website](https://toaster-git.github.io/test_my_site/)" by toaster-git is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Source code: [repository link].
+> Проект "[DARK GDPS Website] (https://toaster-git.github.io/test_my_site/)" от toaster-git Лицензия CC BY-NC 4.0 <br>
+> Project "[DARK GDPS Website] (https://toaster-git.github.io/test_my_site/)" from toaster-git License CC BY-NC 4.0 <br>
 
 [cc-by-nc]: https://creativecommons.org/licenses/by-nc/4.0/
 [cc-by-nc-shield]: https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg
