@@ -1,5 +1,6 @@
 ## :ru: RU: Описание веб-сайта для проекта DARK GDPS
-**Демо-сайт:** [https://github.com/Toaster-git/DARK_GDPS-project-site](https://github.com/Toaster-git/DARK_GDPS-project-site)
+**Демо-сайт:** [https://toaster-git.github.io/DARK_GDPS-project-site/](https://toaster-git.github.io/DARK_GDPS-project-site/)
+
 
 ### О проекте
 Сайт разработан для личного проекта моего друга — приватного сервера **DARK GDPS** (Geometry Dash Private Server).
@@ -15,7 +16,7 @@
 ---
 
 ## :us: EN: Website Description for the DARK GDPS Project
-**Live Demo:** [https://github.com/Toaster-git/DARK_GDPS-project-site](https://github.com/Toaster-git/DARK_GDPS-project-site)
+**Live Demo:** [https://toaster-git.github.io/DARK_GDPS-project-site/](https://toaster-git.github.io/DARK_GDPS-project-site/)
 
 ### About the Project
 This website was developed for my friend's personal project — the private server **DARK GDPS** (Geometry Dash Private Server).
