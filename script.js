@@ -1,557 +1,728 @@
 document.addEventListener('DOMContentLoaded', function() {
-    class Application {
-        constructor() {
-            this.cacheDOM();
-            this.initState();
-            this.bindEvents();
-            this.init();
-        }
+    // КЭШИРОВАНИЕ DOM-ЭЛЕМЕНТОВ
+    const DOM = {
+        navLinks: document.querySelectorAll('.nav-link'),
+        sections: document.querySelectorAll('.section'),
+        sidebar: document.querySelector('.sidebar'),
+        overlay: document.querySelector('.overlay'),
+        mobileToggle: document.querySelector('.mobile-toggle'),
+        musicBtn: document.getElementById('musicBtn'),
+        bgMusic: document.getElementById('bgMusic'),
+        footerCubes: document.getElementById('footerCubes'),
+        volumeSlider: document.getElementById('volumeSlider'),
+        volumeValue: document.getElementById('volumeValue'),
+        refreshNewsBtn: document.getElementById('refreshNewsBtn')
+    };
+    
+    // ПОЛУЧАЕМ ИКОНКУ КНОПКИ МЕНЮ
+    const mobileIcon = DOM.mobileToggle ? DOM.mobileToggle.querySelector('i') : null;
+    
+    // СОСТОЯНИЕ
+    let isMenuOpen = false;
+    let isFirstInteraction = true;
+    let isNewsSectionActive = false;
 
-        cacheDOM() {
-            this.DOM = {
-                navLinks: document.querySelectorAll('.nav-link'),
-                sections: document.querySelectorAll('.section'),
-                sidebar: document.querySelector('.sidebar'),
-                overlay: document.querySelector('.overlay'),
-                mobileToggle: document.querySelector('.mobile-toggle'),
-                musicBtn: document.getElementById('musicBtn'),
-                bgMusic: document.getElementById('bgMusic'),
-                footerCubes: document.getElementById('footerCubes'),
-                volumeSlider: document.getElementById('volumeSlider'),
-                volumeValue: document.getElementById('volumeValue'),
-                refreshNewsBtn: document.getElementById('refreshNewsBtn')
-            };
+    // ============================
+    // ЗАГРУЗКА НОВОСТЕЙ ИЗ JSON
+    // ============================
+    
+    async function loadNews() {
+        // Защита от множественных одновременных запросов
+        if (window.isLoadingNews) {
+            console.log('Новости уже загружаются...');
+            return;
+        }
+        
+        try {
+            window.isLoadingNews = true;
             
-            this.mobileIcon = this.DOM.mobileToggle?.querySelector('i');
-            this.newsContainer = document.getElementById('newsContainer');
-        }
-
-        initState() {
-            this.isMenuOpen = false;
-            this.isFirstInteraction = true;
-            this.isNewsSectionActive = false;
-            this.isLoadingNews = false;
-        }
-
-        bindEvents() {
-            // Навигация
-            this.DOM.navLinks.forEach(link => {
-                link.addEventListener('click', (e) => this.handleNavClick(e));
-            });
-
-            // Мобильное меню
-            if (this.DOM.mobileToggle) {
-                this.DOM.mobileToggle.addEventListener('click', () => this.toggleMobileMenu());
-            }
-
-            if (this.DOM.overlay) {
-                this.DOM.overlay.addEventListener('click', () => this.closeMobileMenu());
-            }
-
-            // Музыка
-            if (this.DOM.musicBtn) {
-                this.DOM.musicBtn.addEventListener('click', () => this.toggleMusic());
-            }
-
-            // Кнопка обновления новостей
-            if (this.DOM.refreshNewsBtn) {
-                this.DOM.refreshNewsBtn.addEventListener('click', () => this.handleRefreshNews());
-            }
-
-            // Глобальные события
-            window.addEventListener('resize', () => this.handleResize());
-            window.addEventListener('scroll', this.throttle(() => this.handleScroll(), 100));
-            window.addEventListener('keydown', (e) => this.handleKeydown(e));
-            window.addEventListener('load', () => this.handleLoad());
-        }
-
-        init() {
-            this.initVolume();
-            this.createFooterCubes();
-            this.updateRefreshButtonPosition();
-        }
-
-        // ==================== НОВОСТИ ====================
-        async loadNews(force = false) {
-            if (this.isLoadingNews) return;
-            this.isLoadingNews = true;
-
-            try {
-                this.showLoadingState();
-                await this.delay(300); // Имитация задержки
-
-                const newsData = await this.fetchNewsData();
-                this.displayNews(newsData);
-            } catch (error) {
-                console.error('Ошибка загрузки новостей:', error);
-                this.displayError(error);
-            } finally {
-                this.hideLoadingState();
-                this.isLoadingNews = false;
-            }
-        }
-
-        async fetchNewsData() {
-            try {
-                const response = await fetch('news.json', {
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
-            } catch {
-                return this.getFallbackData();
-            }
-        }
-
-        getFallbackData() {
-            return [
-
-                {
-                    "title": "Обновление сайта",
-                    "icon": "fas fa-code",
-                    "date": "2025-12-28",
-                    "content": "Переработка сайта для повышения читаемости интерфейса и улучшения отображения стилей.",
-                    "author": "Toaster",
-                    "category": "Разработка"
-                },     
-                {
-                    "title": "Обновление сайта",
-                    "icon": "fas fa-code",
-                    "date": "2025-12-15",
-                    "content": "Сайт полностью переработал Toaster. Добавлил анимация кубиков в подвале сайта.",
-                    "author": "Toaster",
-                    "category": "Разработка"
-                },
-                {
-                    "title": "Создание сайта",
-                    "icon": "fas fa-server",
-                    "date": "2025-08-13",
-                    "content": "Supercret сделал сайт",
-                    "author": "Supercret",
-                    "category": "Разработка"
-                },                    
-            ];
-        }
-
-        displayNews(newsData) {
-            if (!this.newsContainer) return;
-
-            this.newsContainer.innerHTML = '';
-
-            if (!newsData || newsData.length === 0) {
-                this.newsContainer.innerHTML = this.createEmptyNewsMessage();
+            const newsContainer = document.getElementById('newsContainer');
+            
+            if (!newsContainer) {
+                console.error('Контейнер новостей не найден!');
+                window.isLoadingNews = false;
                 return;
             }
-
-            const sortedNews = [...newsData].sort((a, b) => 
-                new Date(b.date) - new Date(a.date)
-            );
-
-            sortedNews.forEach(item => {
-                this.newsContainer.appendChild(this.createNewsCard(item));
-            });
-        }
-
-        createNewsCard(item) {
-            const card = document.createElement('div');
-            card.className = 'news-card';
-
-            const formattedDate = this.formatDate(item.date);
-            const iconClass = item.icon || this.getIconByCategory(item.category);
-
-            card.innerHTML = `
-                <div class="news-header">
-                    <h3><i class="${iconClass}"></i> ${item.title || 'Новая запись'}</h3>
-                    <span class="news-date" title="${item.date}">${formattedDate}</span>
-                </div>
-                <div class="news-content">
-                    <p>${item.content || 'Описание отсутствует'}</p>
-                </div>
-                <div class="news-footer">
-                    <span class="news-author"><i class="fas fa-user"></i> ${item.author || 'Команда'}</span>
-                    <span class="news-category">${item.category || 'Общее'}</span>
+            
+            // Показываем индикатор загрузки
+            if (DOM.refreshNewsBtn) {
+                DOM.refreshNewsBtn.classList.add('spinning');
+            }
+            
+            // Показываем сообщение о загрузке в контейнере
+            newsContainer.innerHTML = `
+                <div class="news-card">
+                    <div class="news-content">
+                        <p style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Загрузка новостей...</p>
+                    </div>
                 </div>
             `;
-
-            return card;
-        }
-
-        formatDate(dateString) {
+            
+            // Имитация задержки для тестирования
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            let response;
             try {
-                return new Date(dateString).toLocaleDateString('ru-RU', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                response = await fetch('news.json', {
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
-            } catch {
-                return dateString || 'Дата не указана';
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+            } catch (fetchError) {
+                console.warn('Не удалось загрузить news.json, используем тестовые данные:', fetchError);
+                
+                // Используем тестовые данные если файл не найден
+                const fallbackData = [
+                    {
+                        "title": "тестовые данные",
+                        "icon": "fas fa-code",
+                        "date": "11-11-11",
+                        "content": "тестовые данные.",
+                        "author": "тестовые данные",
+                        "category": "тестовые данные"
+                    },
+                    {
+                        "title": "тестовые данные",
+                        "icon": "fas fa-code",
+                        "date": "11-11-11",
+                        "content": "тестовые данные.",
+                        "author": "тестовые данные",
+                        "category": "тестовые данные"
+                    },
+                ];
+                
+                displayNews(fallbackData, newsContainer, true);
+                return;
             }
-        }
-
-        getIconByCategory(category) {
-            const icons = {
-                'Разработка': 'fas fa-code',
-                'Ивент': 'fas fa-calendar-alt',
-                'Обновление': 'fas fa-sync-alt',
-                'Важное': 'fas fa-exclamation-circle',
-                'default': 'fas fa-newspaper'
-            };
-            return icons[category] || icons.default;
-        }
-
-        showLoadingState() {
-            if (this.DOM.refreshNewsBtn) {
-                this.DOM.refreshNewsBtn.classList.add('spinning');
-            }
-
-            if (this.newsContainer) {
-                this.newsContainer.innerHTML = `
+            
+            const newsData = await response.json();
+            displayNews(newsData, newsContainer, false);
+            
+        } catch (error) {
+            console.error('Критическая ошибка загрузки новостей:', error);
+            
+            const newsContainer = document.getElementById('newsContainer');
+            if (newsContainer) {
+                newsContainer.innerHTML = `
                     <div class="news-card">
+                        <div class="news-header">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки</h3>
+                        </div>
                         <div class="news-content">
-                            <p style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Загрузка...</p>
+                            <p>Не удалось загрузить новости. Попробуйте обновить страницу позже.</p>
+                            <details style="margin-top: 10px;">
+                                <summary style="cursor: pointer; color: var(--primary-color);">Технические детали</summary>
+                                <p style="font-size: 0.8em; color: var(--text-muted);">Ошибка: ${error.message}</p>
+                            </details>
                         </div>
                     </div>
                 `;
             }
-        }
-
-        hideLoadingState() {
-            if (this.DOM.refreshNewsBtn) {
+        } finally {
+            // Останавливаем анимацию вращения
+            if (DOM.refreshNewsBtn) {
                 setTimeout(() => {
-                    this.DOM.refreshNewsBtn.classList.remove('spinning');
+                    DOM.refreshNewsBtn.classList.remove('spinning');
                 }, 500);
             }
+            
+            // Снимаем блокировку
+            window.isLoadingNews = false;
         }
+    }
 
-        displayError(error) {
-            if (!this.newsContainer) return;
-
-            this.newsContainer.innerHTML = `
+    // Вспомогательная функция для отображения новостей
+    function displayNews(newsData, container, isFallback = false) {
+        // Очищаем контейнер
+        container.innerHTML = '';
+        
+        // Проверяем, есть ли новости
+        if (!newsData || newsData.length === 0) {
+            container.innerHTML = `
                 <div class="news-card">
                     <div class="news-header">
-                        <h3><i class="fas fa-exclamation-triangle"></i> Ошибка</h3>
+                        <h3><i class="fas fa-info-circle"></i> ${isFallback ? 'Тестовые данные' : 'Нет новостей'}</h3>
                     </div>
                     <div class="news-content">
-                        <p>Не удалось загрузить новости. Попробуйте позже.</p>
-                        <details style="margin-top: 10px;">
-                            <summary>Детали</summary>
-                            <p style="font-size: 0.9em; color: var(--text-muted);">${error.message}</p>
-                        </details>
+                        <p>${isFallback ? 'Файл news.json не найден. Используются тестовые данные.' : 'В данный момент новостей нет. Следите за обновлениями!'}</p>
                     </div>
                 </div>
             `;
+            return;
         }
-
-        // ==================== НАВИГАЦИЯ ====================
-        setActiveSection(targetId, forceReload = false) {
-            const currentActive = document.querySelector('.section.active');
-            if (currentActive?.id === targetId && !forceReload) return;
-
-            // Сброс активных классов
-            this.DOM.navLinks.forEach(link => link.classList.remove('active'));
-            this.DOM.sections.forEach(section => section.classList.remove('active'));
-
-            // Активация новой секции
-            const targetLink = document.querySelector(`[data-target="${targetId}"]`);
-            const targetSection = document.getElementById(targetId);
-
-            targetLink?.classList.add('active');
-            targetSection?.classList.add('active');
-
-            // Управление видимостью кнопки обновления
-            this.isNewsSectionActive = targetId === 'news';
-            this.isNewsSectionActive ? this.showRefreshButton() : this.hideRefreshButton();
-
-            // Загрузка новостей если нужно
-            if (targetId === 'news' && (!this.newsContainer.children.length || forceReload)) {
-                setTimeout(() => this.loadNews(), 100);
-            }
-
-            this.closeMobileMenu();
-        }
-
-        handleNavClick(e) {
-            e.preventDefault();
-            const targetId = e.currentTarget.getAttribute('data-target');
-            if (!targetId) return;
-
-            const targetSection = document.getElementById(targetId);
-            const isAlreadyActive = targetSection?.classList.contains('active');
-
-            this.setActiveSection(targetId, !isAlreadyActive);
-
-            if (targetSection) {
-                window.scrollTo({
-                    top: targetSection.offsetTop - 80,
-                    behavior: 'smooth'
+        
+        // Сортируем новости по дате (новые сверху)
+        const sortedNews = [...newsData].sort((a, b) => {
+            return new Date(b.date) - new Date(a.date);
+        });
+        
+        // Создаем карточки для каждой новости
+        sortedNews.forEach(newsItem => {
+            const newsCard = document.createElement('div');
+            newsCard.className = 'news-card';
+            
+            // Форматируем дату для отображения
+            let formattedDate;
+            try {
+                const dateObj = new Date(newsItem.date);
+                formattedDate = dateObj.toLocaleDateString('ru-RU', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
+            } catch (dateError) {
+                formattedDate = newsItem.date || 'Дата не указана';
             }
+            
+            // Определяем иконку
+            const iconClass = newsItem.icon || getIconByCategory(newsItem.category);
+            
+            // Создаем HTML для карточки новости
+            newsCard.innerHTML = `
+                <div class="news-header">
+                    <h3><i class="${iconClass}"></i>${newsItem.title || 'Без названия'}</h3>
+                    <span class="news-date" title="${newsItem.date || ''}">${formattedDate}</span>
+                </div>
+                <div class="news-content">
+                    <p>${newsItem.content || 'Содержание отсутствует'}</p>
+                </div>
+                <div class="news-footer">
+                    <span class="news-author"><i class="fas fa-user"></i> ${newsItem.author || 'Неизвестно'}</span>
+                    <span class="news-category">${newsItem.category || 'Общее'}</span>
+                </div>
+            `;
+            
+            container.appendChild(newsCard);
+        });
+        
+        if (isFallback) {
+            const warning = document.createElement('div');
+            warning.className = 'news-card';
+            warning.style.borderColor = '#FFD700';
+            warning.innerHTML = `
+                <div class="news-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Внимание</h3>
+                </div>
+                <div class="news-content">
+                    <p>Файл <code>news.json</code> не найден или недоступен. Отображаются тестовые данные.</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">
+                        Убедитесь, что файл находится в правильной директории и имеет корректный формат JSON.
+                    </p>
+                </div>
+            `;
+            container.insertBefore(warning, container.firstChild);
         }
+        
+        console.log(`${isFallback ? 'Загружены тестовые' : 'Загружено'} ${sortedNews.length} новостей`);
+    }
 
-        // ==================== МОБИЛЬНОЕ МЕНЮ ====================
-        toggleMobileMenu() {
-            this.isMenuOpen ? this.closeMobileMenu() : this.openMobileMenu();
+    // Функция для получения иконки по категории
+    function getIconByCategory(category) {
+        const iconMap = {
+            'Разработка': 'fas fa-code',
+            'Ивент': 'fas fa-calendar-alt',
+            'Обновление': 'fas fa-sync-alt',
+            'Важное': 'fas fa-exclamation-circle',
+            'default': 'fas fa-newspaper'
+        };
+        
+        return iconMap[category] || iconMap.default;
+    }
+
+    // ============================
+    // УПРАВЛЕНИЕ КНОПКОЙ ОБНОВЛЕНИЯ
+    // ============================
+    
+    function showRefreshButton() {
+        if (DOM.refreshNewsBtn) {
+            DOM.refreshNewsBtn.classList.add('show');
         }
+    }
+    
+    function hideRefreshButton() {
+        if (DOM.refreshNewsBtn) {
+            DOM.refreshNewsBtn.classList.remove('show');
+        }
+    }
+    
+    function updateRefreshButtonPosition() {
+        if (!DOM.refreshNewsBtn) return;
+        
+        // На десктопе с сайдбаром
+        if (window.innerWidth > 992) {
+            DOM.refreshNewsBtn.style.right = 'calc(20px + var(--sidebar-width))';
+        } else {
+            DOM.refreshNewsBtn.style.right = '20px';
+        }
+        
+        // На мобилках с открытым меню
+        if (window.innerWidth <= 992 && isMenuOpen) {
+            DOM.refreshNewsBtn.style.right = 'calc(85% + 20px)';
+        }
+    }
 
-        openMobileMenu() {
-            if (!this.DOM.sidebar || !this.DOM.overlay) return;
-
-            this.DOM.sidebar.classList.add('open');
-            this.DOM.overlay.classList.add('active');
-            this.isMenuOpen = true;
-
-            if (this.mobileIcon) {
-                this.mobileIcon.classList.replace('fa-bars', 'fa-times');
+    // ============================
+    // ИНИЦИАЛИЗАЦИЯ ГРОМКОСТИ
+    // ============================
+    
+    function initVolume() {
+        // Загружаем сохраненную громкость из localStorage
+        const savedVolume = localStorage.getItem('musicVolume');
+        if (savedVolume !== null) {
+            DOM.volumeSlider.value = savedVolume;
+            DOM.volumeValue.textContent = `${savedVolume}%`;
+            DOM.bgMusic.volume = savedVolume / 100;
+            
+            // Устанавливаем начальный прогресс для заполнителя
+            updateSliderProgress(savedVolume);
+        } else {
+            // Устанавливаем громкость по умолчанию (50%)
+            DOM.bgMusic.volume = 0.5;
+            DOM.volumeSlider.value = 50;
+            DOM.volumeValue.textContent = '50%';
+            updateSliderProgress(50);
+        }
+        
+        // Функция для обновления визуального прогресса слайдера
+        function updateSliderProgress(value) {
+            DOM.volumeSlider.style.setProperty('--slider-progress', `${value}%`);
+        }
+        
+        // Настраиваем событие изменения громкости
+        DOM.volumeSlider.addEventListener('input', function() {
+            const volume = this.value / 100;
+            DOM.bgMusic.volume = volume;
+            DOM.volumeValue.textContent = `${this.value}%`;
+            
+            // Обновляем визуальный прогресс
+            updateSliderProgress(this.value);
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('musicVolume', this.value);
+            
+            // Автоматически воспроизводим музыку при первом изменении громкости
+            if (isFirstInteraction && DOM.bgMusic.paused) {
+                isFirstInteraction = false;
+                DOM.bgMusic.play()
+                    .then(() => {
+                        DOM.musicBtn.innerHTML = '<i class="fas fa-pause"></i><span>Выключить музыку</span>';
+                        DOM.musicBtn.style.background = 'linear-gradient(135deg, #FF4444, #CC0000)';
+                    })
+                    .catch(error => {
+                        console.log('Автовоспроизведение заблокировано. Нужно нажать кнопку музыки.');
+                    });
             }
-
-            document.body.style.overflow = 'hidden';
-            this.updateRefreshButtonPosition();
-        }
-
-        closeMobileMenu() {
-            if (!this.DOM.sidebar || !this.DOM.overlay) return;
-
-            this.DOM.sidebar.classList.remove('open');
-            this.DOM.overlay.classList.remove('active');
-            this.isMenuOpen = false;
-
-            if (this.mobileIcon) {
-                this.mobileIcon.classList.replace('fa-times', 'fa-bars');
-            }
-
-            document.body.style.overflow = '';
-            this.updateRefreshButtonPosition();
-        }
-
-        // ==================== АУДИО ====================
-        initVolume() {
+        });
+        
+        // Изменение громкости при загрузке музыки
+        DOM.bgMusic.addEventListener('loadeddata', function() {
             const savedVolume = localStorage.getItem('musicVolume');
-            const defaultVolume = 30;
+            if (savedVolume !== null) {
+                DOM.bgMusic.volume = savedVolume / 100;
+            }
+        });
+    }
+    
 
-            const volume = savedVolume !== null ? parseInt(savedVolume) : defaultVolume;
-            this.setVolume(volume);
-            this.updateSliderProgress(volume);
 
-            this.DOM.volumeSlider.addEventListener('input', (e) => {
-                const value = e.target.value;
-                this.setVolume(value);
-                this.updateSliderProgress(value);
-                localStorage.setItem('musicVolume', value);
 
-                if (this.isFirstInteraction && this.DOM.bgMusic.paused) {
-                    this.isFirstInteraction = false;
-                    this.playMusic();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ============================
+    // ОСНОВНЫЕ ФУНКЦИИ
+    // ============================
+    
+    // УСТАНОВКА АКТИВНОГО РАЗДЕЛА
+    function setActiveSection(targetId, forceReload = false) {
+        // Если уже активна эта секция и не требуется принудительная перезагрузка
+        const currentActive = document.querySelector('.section.active');
+        if (currentActive && currentActive.id === targetId && !forceReload) {
+            return; // Не делаем ничего, если уже на этой странице
+        }
+        
+        // Убираем активные классы
+        DOM.navLinks.forEach(link => link.classList.remove('active'));
+        DOM.sections.forEach(section => section.classList.remove('active'));
+        
+        // Находим и активируем нужный раздел
+        const targetLink = document.querySelector(`[data-target="${targetId}"]`);
+        const targetSection = document.getElementById(targetId);
+        
+        if (targetLink) targetLink.classList.add('active');
+        if (targetSection) targetSection.classList.add('active');
+        
+        // Управляем видимостью кнопки обновления
+        if (targetId === 'news') {
+            isNewsSectionActive = true;
+            showRefreshButton();
+        } else {
+            isNewsSectionActive = false;
+            hideRefreshButton();
+        }
+        
+        // Закрываем меню на мобильных
+        closeMobileMenu();
+        
+        // Если переключаемся на раздел новостей, загружаем их (только если нужно)
+        if (targetId === 'news') {
+            setTimeout(() => {
+                // Проверяем, есть ли уже загруженные новости
+                const newsContainer = document.getElementById('newsContainer');
+                const hasNews = newsContainer && newsContainer.children.length > 0;
+                
+                if (!hasNews || forceReload) {
+                    loadNews();
                 }
-            });
+            }, 100);
         }
+    }
 
-        setVolume(value) {
-            const volume = value / 100;
-            this.DOM.bgMusic.volume = volume;
-            this.DOM.volumeValue.textContent = `${value}%`;
-            this.DOM.volumeSlider.value = value;
+    // ОТКРЫТИЕ МОБИЛЬНОГО МЕНЮ
+    function openMobileMenu() {
+        if (!DOM.sidebar || !DOM.overlay) return;
+        
+        DOM.sidebar.classList.add('open');
+        DOM.overlay.classList.add('active');
+        isMenuOpen = true;
+        
+        // Меняем иконку
+        if (mobileIcon) {
+            mobileIcon.classList.remove('fa-bars');
+            mobileIcon.classList.add('fa-times');
         }
-
-        updateSliderProgress(value) {
-            this.DOM.volumeSlider.style.setProperty('--slider-progress', `${value}%`);
+        
+        // Обновляем позицию кнопки обновления
+        updateRefreshButtonPosition();
+        
+        // Блокируем скролл на основном контенте
+        document.body.classList.add('menu-open');
+        
+        // Запоминаем позицию скролла для возврата
+        if (!window.scrollPosition) {
+            window.scrollPosition = window.scrollY;
         }
+    }
 
-        toggleMusic() {
-            if (!this.DOM.bgMusic) return;
-
-            if (this.DOM.bgMusic.paused) {
-                this.playMusic();
-            } else {
-                this.pauseMusic();
-            }
+    // ЗАКРЫТИЕ МОБИЛЬНОГО МЕНЮ
+    function closeMobileMenu() {
+        if (!DOM.sidebar || !DOM.overlay) return;
+        
+        DOM.sidebar.classList.remove('open');
+        DOM.overlay.classList.remove('active');
+        isMenuOpen = false;
+        
+        // Возвращаем иконку
+        if (mobileIcon) {
+            mobileIcon.classList.remove('fa-times');
+            mobileIcon.classList.add('fa-bars');
         }
-
-        playMusic() {
-            this.DOM.bgMusic.play()
+        
+        // Обновляем позицию кнопки обновления
+        updateRefreshButtonPosition();
+        
+        // Разблокируем скролл на основном контенте
+        document.body.classList.remove('menu-open');
+        
+        // Возвращаем позицию скролла
+        if (window.scrollPosition !== undefined) {
+            window.scrollTo(0, window.scrollPosition);
+            delete window.scrollPosition;
+        }
+    }
+    
+    // ПЕРЕКЛЮЧЕНИЕ МУЗЫКИ
+    function toggleMusic() {
+        if (!DOM.bgMusic || !DOM.musicBtn) return;
+        
+        if (DOM.bgMusic.paused) {
+            DOM.bgMusic.play()
                 .then(() => {
-                    this.DOM.musicBtn.innerHTML = '<i class="fas fa-pause"></i><span>Выключить</span>';
-                    this.DOM.musicBtn.style.background = 'linear-gradient(135deg, var(--primary-dark), var(--primary))';
-                    this.isFirstInteraction = false;
+                    DOM.musicBtn.innerHTML = '<i class="fas fa-pause"></i><span>Выключить музыку</span>';
+                    DOM.musicBtn.style.background = 'linear-gradient(135deg, #FF4444, #CC0000)';
+                    isFirstInteraction = false;
                 })
-                .catch(error => {
-                    console.warn('Автовоспроизведение заблокировано:', error);
+                .catch((error) => {
+                    console.error('Ошибка воспроизведения:', error);
+                    alert('Нажмите "Включить музыку" еще раз для воспроизведения');
                 });
+        } else {
+            DOM.bgMusic.pause();
+            DOM.musicBtn.innerHTML = '<i class="fas fa-music"></i><span>Включить музыку</span>';
+            DOM.musicBtn.style.background = 'linear-gradient(135deg, var(--accent-color), var(--accent-dark))';
         }
-
-        pauseMusic() {
-            this.DOM.bgMusic.pause();
-            this.DOM.musicBtn.innerHTML = '<i class="fas fa-music"></i><span>Включить</span>';
-            this.DOM.musicBtn.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+    }
+    
+    // ПАРАЛЛАКС ЭФФЕКТ ДЛЯ СЕТЧАТОГО ФОНА
+    function updateParallax() {
+        const bgGrid = document.querySelector('.bg-grid');
+        if (!bgGrid) return;
+        
+        const scrollY = window.scrollY;
+        const speed = 0.5;
+        bgGrid.style.backgroundPosition = `0 ${scrollY * speed}px, 20px ${20 + scrollY * speed}px`;
+    }
+    
+    // СОЗДАНИЕ КУБИКОВ В ФУТЕРЕ
+    function createFooterCubes() {
+        if (!DOM.footerCubes) return;
+        
+        // Очищаем предыдущие кубики
+        DOM.footerCubes.innerHTML = '';
+        
+        // Создаем 5-10 случайных кубиков
+        const cubeCount = Math.floor(Math.random() * 6) + 5;
+        const colors = ['#00FF00', '#FFD700', '#FF4500', '#00FFFF', '#FF00FF'];
+        
+        for (let i = 0; i < cubeCount; i++) {
+            const cube = document.createElement('div');
+            cube.className = 'cube-in-footer';
+            
+            // Случайные параметры
+            const size = Math.floor(Math.random() * 15) + 15;
+            const top = Math.random() * 80;
+            const speed = Math.random() * 20 + 30;
+            const delay = Math.random() * 10;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Применяем стили
+            cube.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                top: ${top}%;
+                animation-duration: ${speed}s;
+                animation-delay: -${delay}s;
+                background: ${color};
+            `;
+            
+            DOM.footerCubes.appendChild(cube);
         }
+    }
+    
 
-        // ==================== ВСПОМОГАТЕЛЬНЫЕ ====================
-        createFooterCubes() {
-            if (!this.DOM.footerCubes) return;
-
-            this.DOM.footerCubes.innerHTML = '';
-            const cubeCount = Math.floor(Math.random() * 6) + 5;
-            const colors = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'];
-
-            for (let i = 0; i < cubeCount; i++) {
-                const cube = document.createElement('div');
-                cube.className = 'cube-in-footer';
-
-                const size = Math.floor(Math.random() * 15) + 15;
-                const top = Math.random() * 80;
-                const speed = Math.random() * 20 + 30;
-                const delay = Math.random() * 10;
-                const color = colors[Math.floor(Math.random() * colors.length)];
-
-                cube.style.cssText = `
-                    width: ${size}px;
-                    height: ${size}px;
-                    top: ${top}%;
-                    animation-duration: ${speed}s;
-                    animation-delay: -${delay}s;
-                    background: ${color};
-                    opacity: ${0.3 + Math.random() * 0.4};
-                `;
-
-                this.DOM.footerCubes.appendChild(cube);
+    // ОБРАБОТКА ИЗМЕНЕНИЯ РАЗМЕРА ОКНА
+    function handleResize() {
+        // На десктопе всегда закрываем меню
+        if (window.innerWidth > 992) {
+            // Сбрасываем состояние меню на десктопе
+            if (isMenuOpen) {
+                closeMobileMenu();
+            }
+        } else {
+            // На мобильных устройствах проверяем, нужно ли корректировать высоту сайдбара
+            const sidebar = DOM.sidebar;
+            if (sidebar && sidebar.classList.contains('open')) {
+                // Принудительно устанавливаем высоту сайдбара равной высоте окна
+                sidebar.style.height = '100vh';
             }
         }
+        
+        // Обновляем кубики в футере
+        createFooterCubes();
+        
+        // Обновляем позицию кнопки обновления
+        updateRefreshButtonPosition();
+    }
+    
+    // ОБНОВЛЕНИЕ АКТИВНОГО РАЗДЕЛА ПРИ СКРОЛЛЕ
+    function updateActiveOnScroll() {
+        if (isMenuOpen) return; // Не обновляем при открытом меню
+        
+        const scrollPosition = window.scrollY + 100;
+        let foundActive = false;
+        
+        DOM.sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            const sectionId = section.getAttribute('id');
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                // Если это уже активная секция, не меняем
+                if (!section.classList.contains('active')) {
+                    setActiveSection(sectionId);
+                }
+                foundActive = true;
+            }
+        });
+        
+        // Если не нашли активную секцию (например, в самом начале или конце)
+        if (!foundActive) {
+            const firstSection = DOM.sections[0];
+            if (firstSection && scrollPosition < firstSection.offsetTop) {
+                // Мы в самом верху, устанавливаем первую секцию
+                if (!firstSection.classList.contains('active')) {
+                    setActiveSection(firstSection.id);
+                }
+            }
+        }
+    }
 
-        handleRefreshNews() {
-            if (this.isNewsSectionActive) {
-                this.setActiveSection('news', true);
-            } else {
-                this.setActiveSection('news');
-                const newsSection = document.getElementById('news');
-                if (newsSection) {
+
+
+
+
+    // ============================
+    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // ============================
+
+    // Throttle функция для ограничения частоты вызовов
+    function throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    // ============================
+    // НАСТРОЙКА ОБРАБОТЧИКОВ СОБЫТИЙ
+    // ============================
+    
+    // НАВИГАЦИЯ ПО ССЫЛКАМ
+    DOM.navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-target');
+            
+            if (targetId) {
+                // Проверяем, активна ли уже эта секция
+                const targetSection = document.getElementById(targetId);
+                const isAlreadyActive = targetSection && targetSection.classList.contains('active');
+                
+                setActiveSection(targetId, !isAlreadyActive);
+                
+                // Плавная прокрутка к секции
+                if (targetSection) {
                     window.scrollTo({
-                        top: newsSection.offsetTop - 80,
+                        top: targetSection.offsetTop,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    // Или к верху, если секция не найдена
+                    window.scrollTo({
+                        top: 0,
                         behavior: 'smooth'
                     });
                 }
             }
-        }
-
-        showRefreshButton() {
-            if (this.DOM.refreshNewsBtn) {
-                this.DOM.refreshNewsBtn.classList.add('show');
-                this.updateRefreshButtonPosition();
-            }
-        }
-
-        hideRefreshButton() {
-            if (this.DOM.refreshNewsBtn) {
-                this.DOM.refreshNewsBtn.classList.remove('show');
-            }
-        }
-
-        updateRefreshButtonPosition() {
-            if (!this.DOM.refreshNewsBtn) return;
-
-            if (window.innerWidth > 1024) {
-                this.DOM.refreshNewsBtn.style.right = 'calc(var(--spacing-md) + var(--sidebar-width))';
-            } else if (this.isMenuOpen) {
-                this.DOM.refreshNewsBtn.style.right = 'calc(100% - 320px + var(--spacing-md))';
+        });
+    });
+    
+    // КНОПКА МОБИЛЬНОГО МЕНЮ
+    if (DOM.mobileToggle) {
+        DOM.mobileToggle.addEventListener('click', function() {
+            if (isMenuOpen) {
+                closeMobileMenu();
             } else {
-                this.DOM.refreshNewsBtn.style.right = 'var(--spacing-md)';
+                openMobileMenu();
             }
-        }
-
-        handleResize() {
-            if (window.innerWidth > 1024 && this.isMenuOpen) {
-                this.closeMobileMenu();
-            }
-
-            this.createFooterCubes();
-            this.updateRefreshButtonPosition();
-        }
-
-        handleScroll() {
-            if (this.isMenuOpen) return;
-
-            this.updateActiveSectionOnScroll();
-            this.updateParallax();
-        }
-
-        updateActiveSectionOnScroll() {
-            const scrollPosition = window.scrollY + 100;
-
-            this.DOM.sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                const sectionId = section.id;
-
-                if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                    if (!section.classList.contains('active')) {
-                        this.setActiveSection(sectionId);
-                    }
-                }
-            });
-        }
-
-        updateParallax() {
-            const bgGrid = document.querySelector('.bg-grid');
-            if (!bgGrid) return;
-
-            const scrollY = window.scrollY;
-            const speed = 0.3;
-            bgGrid.style.backgroundPosition = `0 ${scrollY * speed}px, 30px ${30 + scrollY * speed}px`;
-        }
-
-        handleKeydown(e) {
-            if (e.key === 'Escape' && this.isMenuOpen) {
-                this.closeMobileMenu();
-            }
-        }
-
-        handleLoad() {
-            this.createFooterCubes();
-            this.initVolume();
-            this.updateRefreshButtonPosition();
-
-            // Начальная загрузка если активны новости
-            if (this.isNewsSectionActive) {
-                this.loadNews();
-            }
-
-            setTimeout(() => {
-                document.body.classList.add('loaded');
-            }, 100);
-        }
-
-        // Утилиты
-        throttle(func, limit) {
-            let inThrottle;
-            return function() {
-                const args = arguments;
-                const context = this;
-                if (!inThrottle) {
-                    func.apply(context, args);
-                    inThrottle = true;
-                    setTimeout(() => inThrottle = false, limit);
-                }
-            };
-        }
-
-        delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        createEmptyNewsMessage() {
-            return `
-                <div class="news-card">
-                    <div class="news-header">
-                        <h3><i class="fas fa-newspaper"></i> Новостей пока нет</h3>
-                    </div>
-                    <div class="news-content">
-                        <p>Следите за обновлениями. Скоро здесь появятся свежие новости!</p>
-                    </div>
-                </div>
-            `;
-        }
+        });
     }
-
-    // Инициализация приложения
-    new Application();
+    
+    // ЗАКРЫТИЕ МЕНЮ ПО КЛИКУ НА OVERLAY
+    if (DOM.overlay) {
+        DOM.overlay.addEventListener('click', closeMobileMenu);
+    }
+    
+    // ЗАКРЫТИЕ МЕНЮ ПО КЛАВИШЕ ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isMenuOpen) {
+            closeMobileMenu();
+        }
+    });
+    
+    // УПРАВЛЕНИЕ МУЗЫКОЙ
+    if (DOM.musicBtn) {
+        DOM.musicBtn.addEventListener('click', toggleMusic);
+    }
+    
+    // КНОПКА ОБНОВЛЕНИЯ НОВОСТЕЙ
+    if (DOM.refreshNewsBtn) {
+        DOM.refreshNewsBtn.addEventListener('click', function() {
+            if (isNewsSectionActive) {
+                // Принудительная перезагрузка новостей
+                setActiveSection('news', true);
+            } else {
+                // Если не на странице новостей, переключаемся на нее
+                setActiveSection('news');
+                window.scrollTo({
+                    top: document.getElementById('news').offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    }
+    
+    // ============================
+    // ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ
+    // ============================
+    
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', throttle(function() {
+        if (!isMenuOpen) {
+            updateParallax();
+            updateActiveOnScroll();
+        }
+    }, 100)); // Ограничиваем до 10 раз в секунду
+    
+    window.addEventListener('load', function() {
+        createFooterCubes();
+        handleResize(); // Инициализируем правильное состояние
+        initVolume(); // Инициализируем громкость
+        
+        // Инициализируем кнопку обновления
+        updateRefreshButtonPosition();
+        
+        // Загружаем новости при старте если активна вкладка новостей
+        if (isNewsSectionActive) {
+            loadNews();
+        }
+        
+        // Добавляем класс для анимации загрузки
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+        }, 100);
+    });
+    
+    // ============================
+    // ИНИЦИАЛИЗАЦИЯ
+    // ============================
+    
+    updateParallax(); // Первоначальная установка параллакса
+    handleResize();   // Проверяем начальный размер окна
+    
+    // Обновляем кубики в футере каждые 30 секунд
+    // setInterval(createFooterCubes, 30000);
 });

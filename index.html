@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARK GDPS — Приватный сервер Geometry Dash</title>
-    <meta name="description" content="Приватный сервер Geometry Dash с уникальными функциями и активным сообществом">
+    <title>DARK GDPS</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Декоративные элементы фона -->
     <div class="bg-grid"></div>
     <div class="bg-acid"></div>
+    <!-- <canvas id="cubeCanvas" class="cube-canvas"></canvas> -->
 
+    
     <!-- Мобильное меню -->
-    <button class="mobile-toggle" aria-label="Меню навигации">
+    <button class="mobile-toggle" aria-label="Меню">
         <i class="fas fa-bars"></i>
     </button>
     <div class="overlay"></div>
@@ -26,310 +27,313 @@
             <div class="logo-icon">
                 <i class="fas fa-gamepad"></i>
             </div>
-            <div class="logo-text-container">
-                <h1 class="logo-text">DARK GDPS</h1>
-                <p class="logo-subtitle">Приватный сервер</p>
-            </div>
+            <span class="logo-text">DARK GDPS</span>
         </div>
         
         <div class="nav-links">
-            <a href="#about" class="nav-link active" data-target="about">
+
+            <a href="#" class="nav-link active" data-target="about">
                 <i class="fas fa-info-circle"></i>
                 <span>О проекте</span>
             </a>
 
-            <a href="#news" class="nav-link" data-target="news">
+            <a href="#" class="nav-link" data-target="news">
                 <i class="fas fa-newspaper"></i>
                 <span>Новости</span>
-                <span class="badge">3</span>
             </a>
 
-            <a href="#features" class="nav-link" data-target="features">
+            <a href="#" class="nav-link" data-target="features">
                 <i class="fas fa-star"></i>
-                <span>Функции</span>
+                <span>Особенности</span>
             </a>
-
-            <a href="#socials" class="nav-link" data-target="socials">
+            <a href="#" class="nav-link" data-target="socials">
                 <i class="fas fa-share-alt"></i>
-                <span>Сообщество</span>
+                <span>Соцсети</span>
             </a>
 
+            <!-- Разделитель -->
             <div class="nav-divider"></div>
 
-            <a href="#download" class="nav-link" data-target="how_download">
+            <a href="#" class="nav-link" data-target="how_download">
                 <i class="fas fa-download"></i>
-                <span>Установка</span>
+                <span>Как скачать?</span>
             </a>
-        </div>
-        
-        <!-- Аудио панель -->
-        <div class="audio-panel">
-            <div class="music-controls">
-                <button id="musicBtn" class="music-btn">
-                    <i class="fas fa-music"></i>
-                    <span>Включить музыку</span>
-                </button>
-                <div class="music-info">
-                    Автор: <a href="https://soundcloud.com/ghostrifter-official" target="_blank">Ghostrifter</a>
-                </div>
-                <audio id="bgMusic" src="music33/song.mp3" loop></audio>
-            </div>
-            
-            <div class="volume-controls">
-                <div class="volume-header">
-                    <i class="fas fa-volume-up"></i>
-                    <span>Громкость</span>
-                </div>
-                <div class="volume-slider-container">
-                    <input type="range" id="volumeSlider" min="0" max="100" value="30">
-                    <div class="volume-labels">
-                        <span class="volume-min"><i class="fas fa-volume-off"></i></span>
-                        <span class="volume-max"><i class="fas fa-volume-up"></i></span>
-                    </div>
-                </div>
-                <div class="volume-value" id="volumeValue">30%</div>
-            </div>
         </div>
         
         <div class="sidebar-footer">
-            <div class="version">Версия 2.5 • GDPS Edition</div>
-            <div class="credits">Разработка: Supercret & Toaster</div>
+            <div class="version">v2.5 • GDPS Edition</div>
+            <div class="credits">Сайт: Supercret и Toaster</div>
+        </div>  
+          
+                
+        <!-- Кнопка музыки в сайдбаре -->
+        <div class="music-controls">
+            <button id="musicBtn" class="music-btn">
+                <i class="fas fa-music"></i>
+                <span>Включить музыку </span>           
+            </button>
+            <text class="music_author"> Автор: <a href="https://soundcloud.com/ghostrifter-official">Ghostrifter</a> CC BY-SA 3.0</text>
+            <audio id="bgMusic" src="music33/song.mp3" loop></audio>
         </div>
+             
+
+        <!-- Регулятор громкости -->
+        <div class="volume-controls">
+            <div class="volume-header">
+                <i class="fas fa-volume-up"></i>
+                <span>Громкость</span>
+            </div>
+            <div class="volume-slider-container">
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <div class="volume-labels">
+                    <span class="volume-min"><i class="fas fa-volume-off"></i></span>
+                    <span class="volume-max"><i class="fas fa-volume-up"></i></span>
+                </div>
+            </div>
+            <div class="volume-value" id="volumeValue">50%</div>
+        </div>
+
+      
     </nav>
     
     <!-- Основной контент -->
     <main class="main-content">
-        <!-- Секция о проекте -->
-        <section id="about" class="section active">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">Обзор проекта</span>
-                    <h1 class="page-title">DARK GDPS</h1>
-                    <p class="page-desc">Приватный сервер Geometry Dash с расширенными возможностями и активным сообществом</p>
-                </div>
-                
-                <div class="content-grid">
-                    <div class="card">
-                        <div class="card-icon">
-                            <i class="fas fa-server"></i>
-                        </div>
-                        <h3>Что такое GDPS?</h3>
-                        <p>Приватный сервер для Geometry Dash, предоставляющий дополнительные функции, модификации и отдельное сообщество игроков.</p>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-icon">
-                            <i class="fas fa-bullseye"></i>
-                        </div>
-                        <h3>Наша цель</h3>
-                        <p>Создание стабильной платформы для фанатов Geometry Dash с уникальным контентом и регулярными обновлениями.</p>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h3>Сообщество</h3>
-                        <p>Активное сообщество с регулярными ивентами, конкурсами и системой наград за игровые достижения.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
         <!-- Секция новостей -->
         <section id="news" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">Актуальное</span>
-                    <h1 class="page-title">Обновления сервера</h1>
-                    <p class="page-desc">Следите за последними изменениями и событиями</p>
-                </div>
-                
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-bolt"></i> Актуальное</span>
+                <h1 class="page-title">Новости GDPS</h1>
+                <p class="page-desc">Следите за обновлениями и событиями приватного сервера Geometry Dash</p>
+            </div>
+            
                 <div class="news-container" id="newsContainer">
-                    <!-- Новости загружаются через JS -->
+                
                 </div>
             </div>
         </section>
         
-        <!-- Секция функций -->
+        <!-- Секция о проекте -->
+        <section id="about" class="section active">
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-info-circle"></i> Информация</span>
+                <h1 class="page-title">О DARK GDPS</h1>
+                <p class="page-desc">Узнайте больше о нашем приватном сервере Geometry Dash</p>
+            </div>
+            
+            <div class="explanation-box">
+                <h3><i class="fas fa-question-circle"></i> Что это за сервер? </h3>
+                <p><strong>DARK GDPS</strong> — это {placeholder}</p>
+            </div>
+            
+            <div class="explanation-box">
+                <h3><i class="fas fa-question-circle"></i> Что такое GDPS?</h3>
+                <p><strong>GDPS (Geometry Dash Private Server)</strong> — это приватный сервер для игры Geometry Dash, который позволяет использовать модификации, кастомные функции и играть с другими участниками сообщества вне официальных серверов.</p>
+            </div>
+
+            <div class="about-container">
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3>История создания</h3>
+                    <p>DARK GDPS был создан ютубером Darkness первоначально для своей аудитории, но сейчас открыт для всех игроков. Наш сервер предоставляет уникальные возможности и модификации.</p>
+                </div>
+                
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3>Наша цель</h3>
+                    <p>Создать комфортное и стабильное пространство для фанатов Geometry Dash с дополнительными функциями, которых нет в официальной версии игры.</p>
+                </div>
+                
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Сообщество</h3>
+                    <p>Мы активно развиваем сообщество, проводим конкурсы и ивенты. Присоединяйтесь к нашему Discord и Telegram!</p>
+                </div>
+            </div>
+            
+        </section>
+        
+        <!-- Секция особенностей -->
         <section id="features" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">Технологии</span>
-                    <h1 class="page-title">Основные функции</h1>
-                    <p class="page-desc">Технические особенности и возможности сервера</p>
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-star"></i> Возможности</span>
+                <h1 class="page-title">Особенности сервера</h1>
+                <p class="page-desc">Уникальные функции нашего GDPS, которые делают игру интереснее</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Стабильность</h3>
+                    <p>Оптимизированный сервер с минимальными задержками</p>
                 </div>
                 
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <h3>Высокая производительность</h3>
-                        <p>Оптимизированный сервер с минимальной задержкой и стабильным соединением</p>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-desktop"></i>
                     </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-puzzle-piece"></i>
-                        </div>
-                        <h3>Поддержка модов</h3>
-                        <p>Полная совместимость с популярными модификациями и плагинами</p>
+                    <h3>Поддержка Geode</h3>
+                    <p>Полная совместимость с мод-лоадером для ПК версии</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-stopwatch"></i>
                     </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h3>Расширенная статистика</h3>
-                        <p>Детальная аналитика игрового процесса и достижений</p>
+                    <h3>Система спидранов</h3>
+                    <p>Углубленная статистика и рейтинги для спидраннеров</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
                     </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h3>Безопасность</h3>
-                        <p>Защита данных и аккаунтов с системой резервного копирования</p>
+                    <h3>Awards система</h3>
+                    <p>Награды и достижения за игровые успехи</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
                     </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-tools"></i>
-                        </div>
-                        <h3>Регулярные обновления</h3>
-                        <p>Постоянное развитие с добавлением новых функций</p>
+                    <h3>Набор в модерацию</h3>
+                    <p>Активный поиск помощников для управления сообществом</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gift"></i>
                     </div>
-                    
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <h3>Техническая поддержка</h3>
-                        <p>Оперативная помощь по любым вопросам работы сервера</p>
-                    </div>
+                    <h3>Конкурсы</h3>
+                    <p>Регулярные ивенты с призами для участников</p>
                 </div>
             </div>
         </section>
         
-        <!-- Секция сообщества -->
+        <!-- Секция соцсетей -->
         <section id="socials" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">Подключение</span>
-                    <h1 class="page-title">Наше сообщество</h1>
-                    <p class="page-desc">Присоединяйтесь к обсуждениям и оставайтесь в курсе событий</p>
-                </div>
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-hashtag"></i> Подключиться</span>
+                <h1 class="page-title">Наши соцсети</h1>
+                <p class="page-desc">Присоединяйтесь к сообществу DARK GDPS</p>
+            </div>
+            
+            <div class="socials-grid">
+                <a href="https://t.me/Skill_Issue_GD" target="_blank" class="social-card">
+                    <div class="social-icon telegram">
+                        <i class="fab fa-telegram"></i>
+                    </div>
+                    <div class="social-content">
+                        <h3>Telegram канал</h3>
+                        <p>Новости и анонсы</p>
+                    </div>
+                    <div class="social-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
                 
-                <div class="socials-grid">
-                    <a href="https://t.me/Skill_Issue_GD" target="_blank" class="social-card">
-                        <div class="social-icon">
-                            <i class="fab fa-telegram"></i>
-                        </div>
-                        <div class="social-content">
-                            <h3>Telegram-канал</h3>
-                            <p>Официальные анонсы и новости</p>
-                        </div>
-                        <div class="social-link">
-                            <i class="fas fa-external-link-alt"></i>
-                        </div>
-                    </a>
-                    
-                    <a href="https://t.me/cMvt9jwqZF81ZGly" target="_blank" class="social-card">
-                        <div class="social-icon">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                        <div class="social-content">
-                            <h3>Чат сообщества</h3>
-                            <p>Обсуждения и помощь</p>
-                        </div>
-                        <div class="social-link">
-                            <i class="fas fa-external-link-alt"></i>
-                        </div>
-                    </a>
-                    
-                    <a href="https://discord.com/invite/ZbhJQQDC" target="_blank" class="social-card">
-                        <div class="social-icon">
-                            <i class="fab fa-discord"></i>
-                        </div>
-                        <div class="social-content">
-                            <h3>Discord-сервер</h3>
-                            <p>Основная площадка сообщества</p>
-                        </div>
-                        <div class="social-link">
-                            <i class="fas fa-external-link-alt"></i>
-                        </div>
-                    </a>
-                </div>
+                <a href="https://t.me/cMvt9jwqZF81ZGly" target="_blank" class="social-card">
+                    <div class="social-icon telegram-group">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="social-content">
+                        <h3>Telegram группа</h3>
+                        <p>Общение и помощь</p>
+                    </div>
+                    <div class="social-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+                
+                <a href="https://discord.com/invite/ZbhJQQDC" target="_blank" class="social-card">
+                    <div class="social-icon discord">
+                        <i class="fab fa-discord"></i>
+                    </div>
+                    <div class="social-content">
+                        <h3>Discord сервер</h3>
+                        <p>Основное сообщество</p>
+                    </div>
+                    <div class="social-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="about-btn-container">
+                <a href="https://darkgfps.ps.fhgdps.com/onas.html" target="_blank" class="about-btn">
+                    <i class="fas fa-external-link-alt"></i>
+                    Страница "О нас"
+                </a>
             </div>
         </section>
-        
-        <!-- Секция установки -->
+
+        <!-- Секция "Как скачать?" -->
         <section id="how_download" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">Инструкция</span>
-                    <h1 class="page-title">Установка сервера</h1>
-                    <p class="page-desc">Пошаговое руководство по настройке и подключению</p>
-                </div>
-                
-                <div class="steps">
-                    <div class="step">
-                        <div class="step-number">01</div>
-                        <div class="step-content">
-                            <h3>Мобильные устройства</h3>
-                            <ul>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">02</div>
-                        <div class="step-content">
-                            <h3>Компьютер (Windows)</h3>
-                            <ul>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">03</div>
-                        <div class="step-content">
-                            <h3>Регистрация аккаунта</h3>
-                            <ul>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="note">
-                    <div class="note-icon">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <div class="note-content">
-                        <h3>Важная информация</h3>
+            <div class="section-header">
+                <span class="section-tag"><i class="fas fa-download"></i> Инструкции</span>
+                <h1 class="page-title">Как скачать GDPS?</h1>
+                <p class="page-desc">Пошаговая инструкция по установке приватного сервера</p>
+            </div>
+            
+            <div class="download-steps">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3><i class="fas fa-mobile-alt"></i> Для мобильных устройств</h3>
                         <ul>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
-                                <li>Placeholder</li>
+                            <li>Скачайте APK файл с нашего Telegram канала</li>
+                            <li>В настройках устройства разрешите установку из неизвестных источников</li>
+                            <li>Установите приложение и запустите его</li>
+                            <li>Введите логин и пароль от вашего аккаунта GDPS</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3><i class="fas fa-desktop"></i> Для компьютера (Windows)</h3>
+                        <ul>
+                            <li>Скачайте установщик с нашего Discord сервера</li>
+                            <li>Запустите файл и следуйте инструкциям установки</li>
+                            <li>Установите мод-лоадер Geode (рекомендуется)</li>
+                            <li>Запустите игру через ярлык на рабочем столе</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3><i class="fas fa-user-plus"></i> Регистрация аккаунта</h3>
+                        <ul>
+                            <li>Перейдите на страницу регистрации в нашем Discord</li>
+                            <li>Введите желаемый никнейм и пароль</li>
+                            <li>Подтвердите регистрацию через почту</li>
+                            <li>Используйте эти данные для входа в игру</li>
                         </ul>
                     </div>
                 </div>
             </div>
+            
+            <div class="warning-box">
+                <h3><i class="fas fa-exclamation-triangle"></i> Важная информация</h3>
+                <ul>
+                    <li>Не скачивайте файлы с подозрительных сайтов</li>
+                    <li>Используйте только официальные ссылки из наших соцсетей</li>
+                    <li>Для доступа к файлам нужно быть участником наших сообществ</li>
+                    <li>При возникновении проблем обращайтесь в Telegram группу поддержки</li>
+                </ul>
+            </div>
         </section>
+
     </main>
     
     <!-- Кнопка обновления новостей -->
@@ -337,6 +341,21 @@
         <i class="fas fa-sync-alt"></i>
     </button>
     
+    <!-- Футер -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <i class="fas fa-cube"></i> DARK GDPS™
+            </div>
+            <p>Приватный сервер Geometry Dash</p>
+            <!-- <p class="footer-note">Приватный сервер Geometry Dash</p> -->
+        </div>
+        <div class="footer-cubes" id="footerCubes"></div>
+    </footer>
+    
+    <!-- Скрипты -->
     <script src="script.js"></script>
-</body>
+    <script src="background-cube.js"></script>
+
 </html>
+

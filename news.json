@@ -1,0 +1,18 @@
+[
+    {
+        "title": "Обновление сайта",
+        "icon": "fas fa-code",
+        "date": "2025-12-15",
+        "content": "Сайт полностью переработал Toaster. Добавлил анимация кубиков в подвале сайта.",
+        "author": "Toaster",
+        "category": "Разработка"
+    },
+    {
+        "title": "Создание сайта",
+        "icon": "fas fa-server",
+        "date": "2025-08-13",
+        "content": "Supercret сделал сайт",
+        "author": "Supercret",
+        "category": "Разработка"
+    }
+]
